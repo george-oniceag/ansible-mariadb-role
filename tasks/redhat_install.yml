@@ -1,24 +1,50 @@
-- name: Add repository MariaDB amd64
-  yum_repository:
+- block:
+  - name: Add repository MariaDB ppc
+    yum_repository:
         name: MariaDB
         description: MariaDB YUM repository
-        baseurl: "http://yum.mariadb.org/{{mariadb.version}}/{{ansible_distribution|lower}}{{ansible_distribution_major_version}}-amd64"
+        baseurl: "http://yum.mariadb.org/{{mariadb.version}}/rhel{{ansible_distribution_major_version}}-{{ansible_architecture}}"
         gpgkey: "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"
         gpgcheck: yes
         enabled:  no
         state: present
-  when: ansible_architecture == "x86_64"
+    when: not ansible_architecture == "x86_64"
 
-- name: Add repository MariaDB x86
-  yum_repository:
+  - name:  Add repository MariaDB amd64
+    yum_repository:
         name: MariaDB
         description: MariaDB YUM repository
-        baseurl: "http://yum.mariadb.org/{{mariadb.version}}/{{ansible_distribution|lower}}{{ansible_distribution_major_version}}-{{ansible_architecture}}"
+        baseurl: "http://yum.mariadb.org/{{mariadb.version}}/rhel{{ansible_distribution_major_version}}-amd64"
         gpgkey: "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"
         gpgcheck: yes
         enabled:  no
         state: present
-  when: not ansible_architecture == "x86_64"
+    when: ansible_architecture == "x86_64"
+  when: ansible_distribution == "RedHat"
+
+- block: 
+  - name: Add repository MariaDB amd64
+    yum_repository:
+          name: MariaDB
+          description: MariaDB YUM repository
+          baseurl: "http://yum.mariadb.org/{{mariadb.version}}/{{ansible_distribution|lower}}{{ansible_distribution_major_version}}-amd64"
+          gpgkey: "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"
+          gpgcheck: yes
+          enabled:  no
+          state: present
+    when: ansible_architecture == "x86_64"
+
+  - name: Add repository MariaDB x86
+    yum_repository:
+          name: MariaDB
+          description: MariaDB YUM repository
+          baseurl: "http://yum.mariadb.org/{{mariadb.version}}/{{ansible_distribution|lower}}{{ansible_distribution_major_version}}-{{ansible_architecture}}"
+          gpgkey: "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"
+          gpgcheck: yes
+          enabled:  no
+          state: present
+    when: not ansible_architecture == "x86_64"
+  when: not ansible_distribution == "RedHat"
 
 - name: Install MariaDB Client/Server and other dependant pkg
   yum:
