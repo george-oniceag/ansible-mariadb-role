@@ -1,0 +1,28 @@
+---
+- block:
+    - name: start mariadb
+      systemd: name=mariadb state=started
+      become: true
+    
+    - name: restart mariadb
+      systemd: name=mariadb state=restarted
+      become: true
+  
+    - name: enable mariadb
+      systemd: name=mariadb enabled=yes
+      become: true
+  when: ansible_service_mgr == "systemd"
+
+- block:
+    - name: start mariadb
+      service: name=mariadb state=started
+      become: true
+
+    - name: restart mariadb
+      service: name=mariadb state=restarted
+      become: true
+
+    - name: enable mariadb
+      service: name=mariadb enabled=yes
+      become: true
+  when: ansible_service_mgr == "service"

@@ -1,0 +1,32 @@
+---
+- name: Verify and install repo
+  include: "{{ansible_os_family|lower}}_install.yml"
+  become: true
+  notify: enable mariadb
+
+- name: Mariadb Secure Instalation tasks
+  include: "mariadb_secure_installation.yml"
+  notify: restart mariadb
+  when: mariadb_initial_install.changed == true
+
+- name: Configure MariaDB Databasese
+  mysql_db:
+        name: "{{item}}"
+        state: present
+        login_user: 'root'
+        login_password: "{{mariadb.root_password}}"
+  with_items: "{{mariadb_databases}}"
+
+- name: Configure Mariadb Users
+  mysql_user:
+        name: "{{item.value.user}}"
+        host: "{{item.value.remote_hosts}}"
+        password: "{{item.value.password}}"
+        update_password: "{{item.value.password_update}}"
+        encrypted: "{{item.value.password_encryption}}"
+        login_user: 'root'
+        login_password: "{{mariadb.root_password}}"
+        priv: "{{item.value.db_name}}{{item.value.priv}}"
+        state: "{{item.value.state}}"
+  with_dict: "{{mariadb_users}}"
+        

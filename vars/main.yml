@@ -1,0 +1,49 @@
+mariadb:
+        version: '10.1'
+        root_password: 'password'
+        galera: 
+                status: 'no' # yes or no
+                wsrep:
+                        on: 'ON'
+                        provider: '/usr/lib64/galera/libgalera_smm.so'
+                        sst_method: 'rsync'
+                        cluster_name: 'galera'
+                        cluster_address: "gcomm://{{groups.galera}}"
+                        node_name: "{{ansible_hostname}}"
+                        node_address: '192.168.0.1'
+                options:
+                        binlog_format: 'row'
+                        default_storage_engine: 'InnoDB'
+                        innodb_autoinc_lock_mode: '2'
+                        'bind-address': '0.0.0.0'
+                        wsrep_slave_threads: '1'
+                        innodb_flush_log_at_trx_commit: '0'
+                                
+mariadb_databases: ['wordpress_db']
+mariadb_users:
+        'wordpress-user-a':
+                user: 'wordpress-user'
+                password: 'wordpress!password123'
+                password_encryption: 'no' #no/yes
+                password_update: 'always' #always/on_create
+                priv: '.*:ALL,GRANT'
+                remote_hosts: 'localhost'
+                host: 'localhost'
+                state: 'present' #present/absent
+                prefix: 'wp_'
+                db_name: 'wordpress_db'
+        'wordpress-user-b':
+                user: 'wordpress-user'
+                password: 'wordpress!password123'
+                password_encryption: 'no' #no/yes
+                password_update: 'always' #always/on_create
+                priv: '.*:ALL,GRANT'
+                remote_hosts: '127.0.0.1'
+                host: 'localhost'
+                state: 'present' #present/absent
+                prefix: 'wp_'
+                db_name: 'wordpress_db'
+        
+                    
+                        
+                         

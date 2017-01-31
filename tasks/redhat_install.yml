@@ -1,0 +1,64 @@
+- name: Add repository MariaDB amd64
+  yum_repository:
+        name: MariaDB
+        description: MariaDB YUM repository
+        baseurl: "http://yum.mariadb.org/{{mariadb.version}}/{{ansible_distribution|lower}}{{ansible_distribution_major_version}}-amd64"
+        gpgkey: "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"
+        gpgcheck: yes
+        enabled:  no
+        state: present
+  when: ansible_architecture == "x86_64"
+
+- name: Add repository MariaDB x86
+  yum_repository:
+        name: MariaDB
+        description: MariaDB YUM repository
+        baseurl: "http://yum.mariadb.org/{{mariadb.version}}/{{ansible_distribution|lower}}{{ansible_distribution_major_version}}-{{ansible_architecture}}"
+        gpgkey: "https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"
+        gpgcheck: yes
+        enabled:  no
+        state: present
+  when: not ansible_architecture == "x86_64"
+
+- name: Install MariaDB Client/Server and other dependant pkg
+  yum:
+        name: "{{item}}"
+        state: present
+        enablerepo: MariaDB
+  with_items: 
+        - "MariaDB-server"
+        - "MariaDB-client"
+        - "MySQL-python"
+  register: mariadb_initial_install
+
+- name: Start Mariadb Server
+  systemd: name=mariadb state=started
+  become: yes
+  when: ansible_service_mgr == "systemd"
+
+- name: Start Mariadb Server
+  service: name=mariadb state=started
+  become: yes
+  when: ansible_service_mgr == "service"
+  
+- block:
+  - name: Install MariaDB Gelra Cluster and other dependant pkg
+    yum:
+        name: "{{item}}"
+        state: present
+        enablerepo: MariaDB
+    with_items:
+        - "galera"
+        - "MariaDB-compat"
+        - "socat"
+        - "jemalloc"
+
+  - name: Prepare configuration for galera cluster
+    template:
+        src: "galera_{{mariadb.version}}.yml"
+        dest: /etc/my.conf.d/server.cnf
+        owner: 'root'
+        group: 'root'
+        mode: 0644 
+
+  when: mariadb.galera.status == 'yes'

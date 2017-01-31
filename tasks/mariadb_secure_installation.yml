@@ -1,0 +1,36 @@
+- name: Set root pre connect password
+  mysql_user:
+        name: 'root'
+        password: "{{mariadb.root_password}}"
+        login_user: 'root'
+        state: present
+
+- name: Set root Password ans remove remote login
+  mysql_user: 
+        name: 'root'
+        host: "{{item}}"
+        password: "{{mariadb.root_password}}"
+        state: present
+        login_user: 'root'
+        login_password: "{{mariadb.root_password}}"
+  with_items:
+        - 'localhost'
+        - '127.0.0.1'
+        - '::1'
+
+- name: Remove all anonymous user accounts
+  mysql_user:
+        name: ''
+        host_all: yes
+        state: absent
+        login_password: "{{mariadb.root_password}}"
+        login_user: 'root'
+
+- name: Remove test/default databses
+  mysql_db:
+        name: "{{item}}"
+        state: absent
+        login_password: "{{mariadb.root_password}}"
+        login_user: 'root'
+  with_items: "test"
+        

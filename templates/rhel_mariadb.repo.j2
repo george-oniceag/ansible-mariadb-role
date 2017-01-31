@@ -1,0 +1,19 @@
+#####################################################################
+# Ansible generate file ! Please do not edit !
+# Generated date : {{ansible_date_time.weekday}} {{ansible_date_time.date}}
+# Generated for  : {{ansible_hostname}}
+# File name      : {{mariadb.repo | default('/etc/yum.repos.d/mariadb.repo')}}
+#####################################################################
+
+# MariaDB 10.1 CentOS repository list - created 2017-01-12 09:48 UTC
+# http://downloads.mariadb.org/mariadb/repositories/
+{% set var_archi = {{ansible_architecture}} %}
+{% if var_archi == "x86_64" %}
+{% set var_archi == "amd64" %}
+{% endif %}
+
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.1/{{ansible_distribution|lower}}{{ansible_distribution_major_version}}-{{var_archi}}
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1
